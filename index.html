@@ -1,0 +1,901 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart 2-Wheel Autonomous Robot</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    color: #ffffff;
+    background:
+        radial-gradient(circle at top left, #ff6ec7 0%, transparent 28%),
+        radial-gradient(circle at top right, #5ee7df 0%, transparent 25%),
+        radial-gradient(circle at bottom left, #7f7cff 0%, transparent 30%),
+        linear-gradient(135deg, #151044, #24104f, #101d45);
+}
+
+header {
+    padding: 35px 20px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.25);
+    border-bottom: 2px solid rgba(255,255,255,0.2);
+}
+
+header h1 {
+    font-size: clamp(28px, 5vw, 52px);
+    color: #ffffff;
+    text-shadow: 0 0 20px #ff4ecd;
+}
+
+header p {
+    margin-top: 12px;
+    color: #d9e8ff;
+    font-size: 18px;
+}
+
+nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 18px;
+    background: rgba(0,0,0,0.22);
+}
+
+nav a {
+    text-decoration: none;
+    color: white;
+    background: linear-gradient(135deg, #ff4ecd, #7c5cff);
+    padding: 10px 18px;
+    border-radius: 25px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+nav a:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 18px #ff4ecd;
+}
+
+.container {
+    width: min(1200px, 94%);
+    margin: 30px auto;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 22px;
+    font-size: 32px;
+    color: #ffe66d;
+}
+
+.card {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 25px;
+    padding: 25px;
+    margin-bottom: 25px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.25);
+}
+
+.card h3 {
+    color: #5ee7df;
+    margin-bottom: 12px;
+    font-size: 23px;
+}
+
+.card p, .card li {
+    line-height: 1.7;
+    color: #edf2ff;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.info-box {
+    padding: 22px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255,110,199,0.3), rgba(94,231,223,0.2));
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.info-box h4 {
+    color: #ffe66d;
+    margin-bottom: 10px;
+    font-size: 20px;
+}
+
+button {
+    border: none;
+    padding: 12px 22px;
+    margin: 6px;
+    border-radius: 25px;
+    cursor: pointer;
+    color: white;
+    font-weight: bold;
+    background: linear-gradient(135deg, #ff4ecd, #7c5cff);
+    transition: 0.3s;
+}
+
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 18px #ff4ecd;
+}
+
+button.stop {
+    background: linear-gradient(135deg, #ff5252, #ff1744);
+}
+
+button.reset {
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+}
+
+.control-panel {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 15px 0;
+}
+
+label {
+    display: block;
+    margin: 12px 0 5px;
+    color: #ffe66d;
+    font-weight: bold;
+}
+
+input[type="range"],
+input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 12px;
+    background: #f2f2f2;
+    color: #111;
+}
+
+canvas {
+    width: 100%;
+    max-height: 550px;
+    background: #080d25;
+    border: 3px solid #5ee7df;
+    border-radius: 20px;
+    display: block;
+}
+
+.status {
+    text-align: center;
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 15px;
+    background: rgba(0,0,0,0.3);
+    color: #5ee7df;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.matrix {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    max-width: 360px;
+    margin: 20px auto;
+}
+
+.matrix div {
+    background: rgba(0,0,0,0.35);
+    border: 1px solid #5ee7df;
+    border-radius: 10px;
+    padding: 15px 5px;
+    text-align: center;
+    color: #ffe66d;
+    font-weight: bold;
+}
+
+.formula {
+    padding: 18px;
+    margin-top: 12px;
+    border-radius: 15px;
+    background: rgba(0,0,0,0.35);
+    color: #5ee7df;
+    text-align: center;
+    font-size: 18px;
+    overflow-x: auto;
+}
+
+ul {
+    padding-left: 22px;
+}
+
+footer {
+    text-align: center;
+    padding: 28px;
+    margin-top: 35px;
+    background: rgba(0,0,0,0.35);
+    color: #d9e8ff;
+}
+
+.badge {
+    display: inline-block;
+    margin: 5px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: white;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🤖 Smart 2-Wheel Autonomous Robot</h1>
+    <p>Obstacle Avoidance • Motion Control • Robotics Mathematics • Simulation</p>
+</header>
+
+<nav>
+    <a href="#home">Home</a>
+    <a href="#simulation">Simulation</a>
+    <a href="#kinematics">Kinematics</a>
+    <a href="#transformation">Transformation</a>
+    <a href="#control">Control</a>
+    <a href="#about">About Project</a>
+</nav>
+
+<div class="container">
+
+<section id="home">
+    <h2 class="section-title">Project Overview</h2>
+
+    <div class="card">
+        <h3>Project Abstract</h3>
+        <p>
+            This project presents a software-based smart two-wheel autonomous robot
+            capable of moving toward a target while avoiding obstacles. The system
+            combines differential-drive kinematics, forward and inverse kinematics,
+            homogeneous transformation, motion simulation, torque control and
+            obstacle avoidance.
+        </p>
+    </div>
+
+    <div class="grid">
+        <div class="info-box">
+            <h4>🤖 Robot Type</h4>
+            <p>Two-wheel differential-drive mobile robot.</p>
+        </div>
+
+        <div class="info-box">
+            <h4>🧠 Main Intelligence</h4>
+            <p>Target tracking and obstacle avoidance.</p>
+        </div>
+
+        <div class="info-box">
+            <h4>⚙️ Technologies</h4>
+            <p>HTML, CSS, JavaScript, Canvas and Robotics Mathematics.</p>
+        </div>
+
+        <div class="info-box">
+            <h4>🎯 Main Goal</h4>
+            <p>Reach the target safely without colliding with obstacles.</p>
+        </div>
+    </div>
+</section>
+
+<section id="simulation">
+    <h2 class="section-title">Interactive Robot Simulation</h2>
+
+    <div class="card">
+        <h3>Robot Control Panel</h3>
+
+        <div class="grid">
+            <div>
+                <label for="targetX">Target X Position</label>
+                <input type="number" id="targetX" value="850" min="50" max="950">
+
+                <label for="targetY">Target Y Position</label>
+                <input type="number" id="targetY" value="400" min="50" max="500">
+            </div>
+
+            <div>
+                <label for="speed">Robot Speed</label>
+                <input type="range" id="speed" min="1" max="8" value="3">
+                <p>Speed: <span id="speedValue">3</span></p>
+
+                <label for="avoidance">Obstacle Avoidance Strength</label>
+                <input type="range" id="avoidance" min="1" max="10" value="6">
+                <p>Strength: <span id="avoidanceValue">6</span></p>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <button onclick="startRobot()">▶ Start Robot</button>
+            <button class="stop" onclick="stopRobot()">⏸ Stop Robot</button>
+            <button class="reset" onclick="resetRobot()">↻ Reset</button>
+            <button onclick="addObstacle()">＋ Add Obstacle</button>
+        </div>
+
+        <canvas id="robotCanvas" width="1000" height="560"></canvas>
+
+        <div class="status" id="status">
+            Status: Robot Ready
+        </div>
+    </div>
+</section>
+
+<section id="kinematics">
+    <h2 class="section-title">Differential Drive Kinematics</h2>
+
+    <div class="card">
+        <h3>Wheel Speed Control</h3>
+
+        <div class="grid">
+            <div>
+                <label for="leftWheel">Left Wheel Speed</label>
+                <input type="range" id="leftWheel" min="-5" max="5" step="0.1" value="2">
+                <p>Left Wheel: <span id="leftValue">2</span></p>
+            </div>
+
+            <div>
+                <label for="rightWheel">Right Wheel Speed</label>
+                <input type="range" id="rightWheel" min="-5" max="5" step="0.1" value="2">
+                <p>Right Wheel: <span id="rightValue">2</span></p>
+            </div>
+        </div>
+
+        <div class="formula">
+            v = (R / 2) × (ωR + ωL)
+        </div>
+
+        <div class="formula">
+            ω = (R / L) × (ωR − ωL)
+        </div>
+
+        <div class="grid">
+            <div class="info-box">
+                <h4>Linear Velocity</h4>
+                <p id="linearVelocity">0</p>
+            </div>
+
+            <div class="info-box">
+                <h4>Angular Velocity</h4>
+                <p id="angularVelocity">0</p>
+            </div>
+
+            <div class="info-box">
+                <h4>Motion Type</h4>
+                <p id="motionType">Straight Motion</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="transformation">
+    <h2 class="section-title">Homogeneous Transformation Matrix</h2>
+
+    <div class="card">
+        <h3>Robot Position and Orientation</h3>
+
+        <div class="grid">
+            <div>
+                <label for="posX">X Position</label>
+                <input type="range" id="posX" min="0" max="10" step="0.1" value="3">
+                <p>X = <span id="posXValue">3</span></p>
+            </div>
+
+            <div>
+                <label for="posY">Y Position</label>
+                <input type="range" id="posY" min="0" max="10" step="0.1" value="4">
+                <p>Y = <span id="posYValue">4</span></p>
+            </div>
+
+            <div>
+                <label for="angle">Rotation Angle</label>
+                <input type="range" id="angle" min="0" max="360" value="45">
+                <p>Angle = <span id="angleValue">45°</span></p>
+            </div>
+        </div>
+
+        <div class="matrix">
+            <div id="m11">0.707</div>
+            <div id="m12">-0.707</div>
+            <div id="m13">3</div>
+            <div id="m21">0.707</div>
+            <div id="m22">0.707</div>
+            <div id="m23">4</div>
+            <div>0</div>
+            <div>0</div>
+            <div>1</div>
+        </div>
+
+        <div class="formula">
+            T =
+            [ cosθ  −sinθ  x ]
+            [ sinθ   cosθ  y ]
+            [  0      0    1 ]
+        </div>
+    </div>
+</section>
+
+<section id="control">
+    <h2 class="section-title">Motion and Torque Control</h2>
+
+    <div class="grid">
+        <div class="card">
+            <h3>Newton's Second Law</h3>
+            <p>
+                Force is calculated using the relationship between mass and
+                acceleration.
+            </p>
+
+            <div class="formula">
+                F = m × a
+            </div>
+
+            <label for="mass">Mass</label>
+            <input type="range" id="mass" min="1" max="20" value="5">
+
+            <label for="acceleration">Acceleration</label>
+            <input type="range" id="acceleration" min="0" max="10" value="3">
+
+            <div class="status">
+                Force = <span id="forceValue">15</span> N
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Rotational Motion</h3>
+            <p>
+                Torque is calculated using moment of inertia and angular
+                acceleration.
+            </p>
+
+            <div class="formula">
+                τ = I × α
+            </div>
+
+            <label for="inertia">Moment of Inertia</label>
+            <input type="range" id="inertia" min="1" max="20" value="4">
+
+            <label for="angularAcceleration">Angular Acceleration</label>
+            <input type="range" id="angularAcceleration" min="0" max="10" value="2">
+
+            <div class="status">
+                Torque = <span id="torqueValue">8</span> Nm
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="about">
+    <h2 class="section-title">About the Project</h2>
+
+    <div class="card">
+        <h3>Objectives</h3>
+        <ul>
+            <li>Design a two-wheel differential-drive robot simulation.</li>
+            <li>Implement obstacle avoidance logic.</li>
+            <li>Demonstrate forward and inverse kinematics.</li>
+            <li>Calculate robot position using transformation matrices.</li>
+            <li>Demonstrate linear and rotational motion.</li>
+            <li>Build a colorful interactive user interface.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>System Modules</h3>
+
+        <span class="badge">Robot Simulation</span>
+        <span class="badge">Obstacle Avoidance</span>
+        <span class="badge">Forward Kinematics</span>
+        <span class="badge">Inverse Kinematics</span>
+        <span class="badge">Transformation Matrix</span>
+        <span class="badge">Torque Control</span>
+        <span class="badge">Motion Control</span>
+        <span class="badge">Interactive Dashboard</span>
+    </div>
+
+    <div class="card">
+        <h3>Future Enhancements</h3>
+        <ul>
+            <li>Connect the system with a real Arduino robot.</li>
+            <li>Add ultrasonic and LiDAR sensor data.</li>
+            <li>Use ROS2 and Gazebo for realistic simulation.</li>
+            <li>Add camera-based obstacle detection.</li>
+            <li>Implement PID motor control.</li>
+            <li>Add machine learning for path planning.</li>
+        </ul>
+    </div>
+</section>
+
+</div>
+
+<footer>
+    <p>© 2026 Smart Robot Project | AI & Data Science | Robotics Mini Project</p>
+</footer>
+
+<script>
+const canvas = document.getElementById("robotCanvas");
+const ctx = canvas.getContext("2d");
+
+let robot = {
+    x: 100,
+    y: 280,
+    angle: 0,
+    radius: 22
+};
+
+let running = false;
+let animationId = null;
+let obstacles = [
+    {x: 300, y: 130, w: 100, h: 80},
+    {x: 520, y: 320, w: 130, h: 80},
+    {x: 720, y: 120, w: 100, h: 90}
+];
+
+let path = [];
+
+const targetX = document.getElementById("targetX");
+const targetY = document.getElementById("targetY");
+const speedInput = document.getElementById("speed");
+const avoidanceInput = document.getElementById("avoidance");
+
+speedInput.addEventListener("input", () => {
+    document.getElementById("speedValue").textContent = speedInput.value;
+});
+
+avoidanceInput.addEventListener("input", () => {
+    document.getElementById("avoidanceValue").textContent = avoidanceInput.value;
+});
+
+function drawGrid() {
+    ctx.strokeStyle = "rgba(94,231,223,0.12)";
+    ctx.lineWidth = 1;
+
+    for (let x = 0; x <= canvas.width; x += 40) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+    }
+
+    for (let y = 0; y <= canvas.height; y += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+    }
+}
+
+function drawTarget() {
+    const tx = Number(targetX.value);
+    const ty = Number(targetY.value);
+
+    ctx.beginPath();
+    ctx.arc(tx, ty, 22, 0, Math.PI * 2);
+    ctx.strokeStyle = "#ffe66d";
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(tx, ty, 6, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffe66d";
+    ctx.fill();
+
+    ctx.fillStyle = "#ffe66d";
+    ctx.font = "bold 16px Arial";
+    ctx.fillText("TARGET", tx - 30, ty - 32);
+}
+
+function drawObstacles() {
+    obstacles.forEach((o) => {
+        ctx.fillStyle = "#ff4ecd";
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.fillRect(o.x, o.y, o.w, o.h);
+        ctx.strokeRect(o.x, o.y, o.w, o.h);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 14px Arial";
+        ctx.fillText("OBSTACLE", o.x + 10, o.y + 25);
+    });
+}
+
+function drawPath() {
+    if (path.length < 2) return;
+
+    ctx.beginPath();
+    ctx.moveTo(path[0].x, path[0].y);
+
+    for (let i = 1; i < path.length; i++) {
+        ctx.lineTo(path[i].x, path[i].y);
+    }
+
+    ctx.strokeStyle = "#5ee7df";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+}
+
+function drawRobot() {
+    ctx.save();
+    ctx.translate(robot.x, robot.y);
+    ctx.rotate(robot.angle);
+
+    ctx.fillStyle = "#00c6ff";
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 3;
+
+    ctx.beginPath();
+    ctx.arc(0, 0, robot.radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = "#11152f";
+    ctx.fillRect(-25, -27, 12, 54);
+    ctx.fillRect(13, -27, 12, 54);
+
+    ctx.beginPath();
+    ctx.moveTo(25, 0);
+    ctx.lineTo(42, -10);
+    ctx.lineTo(42, 10);
+    ctx.closePath();
+    ctx.fillStyle = "#ffe66d";
+    ctx.fill();
+
+    ctx.restore();
+}
+
+function distanceToTarget() {
+    const tx = Number(targetX.value);
+    const ty = Number(targetY.value);
+
+    return Math.sqrt(
+        Math.pow(tx - robot.x, 2) +
+        Math.pow(ty - robot.y, 2)
+    );
+}
+
+function obstacleNearRobot() {
+    const strength = Number(avoidanceInput.value) * 7;
+
+    return obstacles.some((o) => {
+        return (
+            robot.x > o.x - strength &&
+            robot.x < o.x + o.w + strength &&
+            robot.y > o.y - strength &&
+            robot.y < o.y + o.h + strength
+        );
+    });
+}
+
+function updateRobot() {
+    if (!running) return;
+
+    const tx = Number(targetX.value);
+    const ty = Number(targetY.value);
+
+    let dx = tx - robot.x;
+    let dy = ty - robot.y;
+
+    let desiredAngle = Math.atan2(dy, dx);
+    let difference = desiredAngle - robot.angle;
+
+    while (difference > Math.PI) difference -= Math.PI * 2;
+    while (difference < -Math.PI) difference += Math.PI * 2;
+
+    robot.angle += difference * 0.08;
+
+    let currentSpeed = Number(speedInput.value);
+
+    if (obstacleNearRobot()) {
+        robot.angle += 0.08;
+        currentSpeed *= 0.25;
+
+        document.getElementById("status").textContent =
+            "Status: Obstacle detected - Avoiding obstacle";
+    } else {
+        document.getElementById("status").textContent =
+            "Status: Robot moving toward target";
+    }
+
+    robot.x += Math.cos(robot.angle) * currentSpeed;
+    robot.y += Math.sin(robot.angle) * currentSpeed;
+
+    robot.x = Math.max(25, Math.min(canvas.width - 25, robot.x));
+    robot.y = Math.max(25, Math.min(canvas.height - 25, robot.y));
+
+    path.push({x: robot.x, y: robot.y});
+
+    if (path.length > 1000) {
+        path.shift();
+    }
+
+    if (distanceToTarget() < 30) {
+        running = false;
+        document.getElementById("status").textContent =
+            "Status: Target reached successfully!";
+    }
+}
+
+function drawScene() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawGrid();
+    drawTarget();
+    drawObstacles();
+    drawPath();
+    drawRobot();
+}
+
+function animate() {
+    updateRobot();
+    drawScene();
+
+    if (running) {
+        animationId = requestAnimationFrame(animate);
+    }
+}
+
+function startRobot() {
+    if (!running) {
+        running = true;
+        document.getElementById("status").textContent =
+            "Status: Robot started";
+        animate();
+    }
+}
+
+function stopRobot() {
+    running = false;
+
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+    }
+
+    document.getElementById("status").textContent =
+        "Status: Robot stopped";
+    drawScene();
+}
+
+function resetRobot() {
+    running = false;
+
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+    }
+
+    robot = {
+        x: 100,
+        y: 280,
+        angle: 0,
+        radius: 22
+    };
+
+    path = [];
+
+    document.getElementById("status").textContent =
+        "Status: Robot reset";
+    drawScene();
+}
+
+function addObstacle() {
+    const x = 150 + Math.random() * 700;
+    const y = 70 + Math.random() * 400;
+
+    obstacles.push({
+        x: x,
+        y: y,
+        w: 80 + Math.random() * 70,
+        h: 60 + Math.random() * 50
+    });
+
+    drawScene();
+}
+
+document.getElementById("leftWheel").addEventListener("input", updateKinematics);
+document.getElementById("rightWheel").addEventListener("input", updateKinematics);
+
+function updateKinematics() {
+    const left = Number(document.getElementById("leftWheel").value);
+    const right = Number(document.getElementById("rightWheel").value);
+
+    const wheelRadius = 0.05;
+    const wheelDistance = 0.30;
+
+    const linear = (wheelRadius / 2) * (right + left);
+    const angular = (wheelRadius / wheelDistance) * (right - left);
+
+    document.getElementById("leftValue").textContent = left.toFixed(1);
+    document.getElementById("rightValue").textContent = right.toFixed(1);
+    document.getElementById("linearVelocity").textContent =
+        linear.toFixed(3) + " m/s";
+    document.getElementById("angularVelocity").textContent =
+        angular.toFixed(3) + " rad/s";
+
+    let motion = "Straight Motion";
+
+    if (left > 0 && right < 0) {
+        motion = "Rotate Right";
+    } else if (left < 0 && right > 0) {
+        motion = "Rotate Left";
+    } else if (left !== right) {
+        motion = "Turning Motion";
+    } else if (left === 0 && right === 0) {
+        motion = "Robot Stopped";
+    } else if (left < 0 && right < 0) {
+        motion = "Moving Backward";
+    }
+
+    document.getElementById("motionType").textContent = motion;
+}
+
+["posX", "posY", "angle"].forEach((id) => {
+    document.getElementById(id).addEventListener("input", updateMatrix);
+});
+
+function updateMatrix() {
+    const x = Number(document.getElementById("posX").value);
+    const y = Number(document.getElementById("posY").value);
+    const degrees = Number(document.getElementById("angle").value);
+
+    const theta = degrees * Math.PI / 180;
+
+    document.getElementById("posXValue").textContent = x.toFixed(1);
+    document.getElementById("posYValue").textContent = y.toFixed(1);
+    document.getElementById("angleValue").textContent = degrees + "°";
+
+    document.getElementById("m11").textContent = Math.cos(theta).toFixed(3);
+    document.getElementById("m12").textContent = (-Math.sin(theta)).toFixed(3);
+    document.getElementById("m13").textContent = x.toFixed(1);
+    document.getElementById("m21").textContent = Math.sin(theta).toFixed(3);
+    document.getElementById("m22").textContent = Math.cos(theta).toFixed(3);
+    document.getElementById("m23").textContent = y.toFixed(1);
+}
+
+["mass", "acceleration"].forEach((id) => {
+    document.getElementById(id).addEventListener("input", updateForce);
+});
+
+function updateForce() {
+    const mass = Number(document.getElementById("mass").value);
+    const acceleration = Number(document.getElementById("acceleration").value);
+
+    document.getElementById("forceValue").textContent =
+        (mass * acceleration).toFixed(2);
+}
+
+["inertia", "angularAcceleration"].forEach((id) => {
+    document.getElementById(id).addEventListener("input", updateTorque);
+});
+
+function updateTorque() {
+    const inertia = Number(document.getElementById("inertia").value);
+    const angularAcceleration =
+        Number(document.getElementById("angularAcceleration").value);
+
+    document.getElementById("torqueValue").textContent =
+        (inertia * angularAcceleration).toFixed(2);
+}
+
+updateKinematics();
+updateMatrix();
+updateForce();
+updateTorque();
+drawScene();
+</script>
+
+</body>
+</html>
